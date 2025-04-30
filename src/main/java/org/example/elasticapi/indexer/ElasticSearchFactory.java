@@ -20,7 +20,8 @@ import javax.net.ssl.SSLContext;
 @RequiredArgsConstructor
 public class ElasticSearchFactory {
     private final String serverUrl = "http://localhost:9200";
-    private final String apiKey = "dVg1ZWhKWUJ0dmp2TGxraDVRM0w6MXVYMGdkS3NUYkdyaEdEMDFjS1FIdw==";
+//    private final String apiKey = "dVg1ZWhKWUJ0dmp2TGxraDVRM0w6MXVYMGdkS3NUYkdyaEdEMDFjS1FIdw==";
+    private final String apiKey = "RVFlV2lKWUI0SDhfcURiamU2Mm06R2E5Q0MzRmtRSWU3QzBEd0l6b3l3dw==";
     private final String username = "elastic";
     private final String password = "changeme";
 //    private final String fingerprint;

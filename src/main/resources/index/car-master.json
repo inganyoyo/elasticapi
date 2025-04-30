@@ -241,7 +241,7 @@
         },
         "stopword": {
           "type": "stop",
-          "stopword_path": "stopword.txt"
+          "stopword_path": "dictionary/stopword.txt"
         },
         "english_stopword": {
           "type": "stop",
