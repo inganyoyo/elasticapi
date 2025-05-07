@@ -1,5 +1,8 @@
 package org.example.elasticapi.indexer;
 
+import co.elastic.clients.elasticsearch.core.CountRequest;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.indices.DeleteIndexRequest;
 import co.elastic.clients.elasticsearch.indices.DeleteIndexResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -13,10 +16,12 @@ import org.apache.http.nio.entity.NStringEntity;
 import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
+import org.example.elasticapi.dto.CarMaster;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -31,6 +36,7 @@ public class IndexerHelper {
 //        elasticSearchClientManager.getClient(indexName)
 //                .indices()
 //                .create(c -> c.index(indexName));
+
 
         RestClient restClient = elasticSearchClientManager.getRestClient(indexName);
         Request request = new Request(HttpPut.METHOD_NAME, "/" + indexName);
@@ -62,5 +68,23 @@ public class IndexerHelper {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public Long countIndex(String indexName) {
+        CountRequest countRequest = CountRequest.of(c -> c.index(indexName));
+        try {
+            return elasticSearchClientManager.getClient(indexName)
+                    .count(countRequest)
+                    .count();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<CarMaster.Response>  search(SearchRequest searchRequest, String indexName) throws IOException {
+        return elasticSearchClientManager.getClient(indexName)
+                .search(searchRequest, CarMaster.Response.class)
+                .hits().hits().stream().map(Hit::source)
+                .toList();
     }
 }
