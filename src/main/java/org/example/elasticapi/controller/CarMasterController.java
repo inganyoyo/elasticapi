@@ -33,5 +33,8 @@ public class CarMasterController {
     public List<CarMaster.Response> search(@ModelAttribute CarMaster.Request request) throws IOException {
         return carMasterService.search(request);
     }
-
+    @GetMapping("/completion")
+    public List<CarMaster.CompletionResponse> completion(@ModelAttribute CarMaster.CompletionRequest request) throws IOException {
+        return carMasterService.completion(request);
+    }
 }
