@@ -1,0 +1,220 @@
+PUT _index_template/common-search-template
+{
+  "index_patterns": ["search-*"],
+  "template": {
+    "settings": {
+      "analysis": {
+        "analyzer": {
+          "search_query_korean": {
+            "tokenizer": "nori_tokenizer",
+            "filter": [
+              "lowercase",
+              "trim",
+              "nori_part_of_speech",
+              "synonym"
+            ]
+          },
+          "search_index_korean": {
+            "tokenizer": "nori_tokenizer",
+            "filter": [
+              "lowercase",
+              "trim",
+              "synonym",
+              "stopword",
+              "nori_part_of_speech"
+            ],
+            "char_filter": [
+              "lowercase_char_filter"
+            ]
+          },
+          "search_index_english": {
+            "tokenizer": "standard",
+            "filter": [
+              "english_possessive_stemmer",
+              "lowercase",
+              "stopword",
+              "english_stopword",
+              "english_porter_stemmer"
+            ]
+          },
+          "search_query_english": {
+            "tokenizer": "standard",
+            "filter": [
+              "english_possessive_stemmer",
+              "lowercase",
+              "english_porter_stemmer",
+              "synonym"
+            ]
+          },
+          "search_index_standard": {
+            "tokenizer": "whitespace",
+            "filter": [
+              "lowercase",
+              "trim",
+              "stopword"
+            ]
+          },
+          "search_query_standard": {
+            "tokenizer": "whitespace",
+            "filter": [
+              "lowercase",
+              "trim"
+            ]
+          }
+        },
+        "char_filter": {
+          "whitespace_remove": {
+            "type": "pattern_replace",
+            "pattern": " ",
+            "replacement": ""
+          }
+        },
+        "tokenizer": {
+          "nori_tokenizer": {
+            "type": "nori_tokenizer",
+            "user_dictionary": "dictionary/ko_dict.txt",
+            "decompound_mode": "discard"
+          }
+        },
+        "filter": {
+          "synonym": {
+            "type": "synonym",
+            "synonyms_path": "dictionary/synonyms.txt"
+          },
+          "stopword": {
+            "type": "stop",
+            "stopword_path": "dictionary/stopword.txt"
+          },
+          "english_stopword": {
+            "type": "stop",
+            "stopwords": "_english_"
+          },
+          "nori_part_of_speech": {
+            "type": "nori_part_of_speech",
+            "stoptags": [
+              "E", "IC", "J", "MAG", "MM", "NA", "NR", "SC", "SE", "SF",
+              "SH", "SN", "SP", "SSC", "SSO", "SY", "UNA", "UNKNOWN",
+              "VA", "VCN", "VCP", "VSV", "VV", "VX", "XPN", "XR", "XSA", "XSN", "XSV"
+            ]
+          },
+          "english_porter_stemmer": {
+            "type": "stemmer",
+            "language": "english"
+          },
+          "english_possessive_stemmer": {
+            "type": "stemmer",
+            "language": "possessive_english"
+          }
+        }
+      }
+    }
+  },
+  "composed_of": [],
+  "priority": 500,
+  "version": 2
+}
+
+DELETE search-article-index
+
+PUT search-article-index
+{
+  "mappings": {
+    "properties": {
+      "title": {
+        "type": "text",
+        "fields": {
+          "korean": {
+            "type": "text",
+            "analyzer": "search_index_korean",
+            "search_analyzer": "search_query_korean"
+          },
+          "english": {
+            "type": "text",
+            "analyzer": "search_index_english",
+            "search_analyzer": "search_query_english"
+          },
+          "standard": {
+            "type": "text",
+            "analyzer": "search_index_standard",
+            "search_analyzer": "search_query_standard"
+          }
+        }
+      },
+      "content": {
+        "type": "text",
+        "fields": {
+          "korean": {
+            "type": "text",
+            "analyzer": "search_index_korean",
+            "search_analyzer": "search_query_korean"
+          },
+          "english": {
+            "type": "text",
+            "analyzer": "search_index_english",
+            "search_analyzer": "search_query_english"
+          },
+          "standard": {
+            "type": "text",
+            "analyzer": "search_index_standard",
+            "search_analyzer": "search_query_standard"
+          }
+        }
+      }
+    }
+  }
+}
+
+POST search-article-index/_bulk
+{ "index": {} }
+{ "title": "서울의 Beautiful night", "content": "The city of 서울 shines brightly every night." }
+{ "index": {} }
+{ "title": "AI 혁신 시대", "content": "Artificial Intelligence is changing 산업 전반." }
+{ "index": {} }
+{ "title": "대한민국 Culture", "content": "한국의 전통과 modern culture가 공존합니다." }
+{ "index": {} }
+{ "title": "Spring 꽃 Festival", "content": "봄꽃이 만발하는 아름다운 축제." }
+{ "index": {} }
+{ "title": "Global 경제 흐름", "content": "세계 경제가 빠르게 변화하고 있습니다." }
+{ "index": {} }
+{ "title": "Tech 발전 방향", "content": "기술 발전이 미래를 만듭니다." }
+{ "index": {} }
+{ "title": "Education 혁신", "content": "혁신적인 교육 방식이 확산되고 있습니다." }
+{ "index": {} }
+{ "title": "한글과 English", "content": "Korean and English languages are 모두 중요합니다." }
+{ "index": {} }
+{ "title": "맛있는 Food", "content": "다양한 음식이 사람들을 행복하게 합니다." }
+{ "index": {} }
+{ "title": "환경 Protection", "content": "환경 보호는 모두의 책임입니다." }
+
+
+GET search-article-index/_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match": {
+            "title.korean": "대한민국 만세"
+          }
+        },
+        {
+          "match": {
+            "content.english": "Korean culture"
+          }
+        }
+      ]
+    }
+  }
+}
+
+GET search-article-index/_search
+{
+  "query": {
+    "match_phrase": {
+      "content.standard": {
+        "query": "전통과 modern culture가",
+        "slop": 0
+      }
+    }
+  }
+}
