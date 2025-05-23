@@ -1,3 +1,4 @@
+
 PUT _index_template/common-search-template
 {
   "index_patterns": ["search-*"],
@@ -159,6 +160,26 @@ PUT search-article-index
             "search_analyzer": "search_query_standard"
           }
         }
+      },
+      "attachments_content": {
+        "type": "text",
+        "fields": {
+          "korean": {
+            "type": "text",
+            "analyzer": "search_index_korean",
+            "search_analyzer": "search_query_korean"
+          },
+          "english": {
+            "type": "text",
+            "analyzer": "search_index_english",
+            "search_analyzer": "search_query_english"
+          },
+          "standard": {
+            "type": "text",
+            "analyzer": "search_index_standard",
+            "search_analyzer": "search_query_standard"
+          }
+        }
       }
     }
   }
@@ -166,25 +187,102 @@ PUT search-article-index
 
 POST search-article-index/_bulk
 { "index": {} }
-{ "title": "서울의 Beautiful night", "content": "The city of 서울 shines brightly every night." }
+{
+  "title": "서울의 Beautiful night",
+  "content": "The city of 서울 shines brightly every night.",
+  "attachments_content": [
+    "밤하늘의 별이 반짝입니다.",
+    "서울의 야경 사진 모음입니다."
+  ]
+}
 { "index": {} }
-{ "title": "AI 혁신 시대", "content": "Artificial Intelligence is changing 산업 전반." }
+{
+  "title": "AI 혁신 시대",
+  "content": "Artificial Intelligence is changing 산업 전반.",
+  "attachments_content": [
+    "머신러닝 기술 소개",
+    "AI 활용 사례 분석",
+    "신경망 모델 구조"
+  ]
+}
 { "index": {} }
-{ "title": "대한민국 Culture", "content": "한국의 전통과 modern culture가 공존합니다." }
+{
+  "title": "대한민국 Culture",
+  "content": "한국의 전통과 modern culture가 공존합니다.",
+  "attachments_content": [
+    "한복의 역사와 의미",
+    "한국 전통 음식 소개",
+    "현대 문화와 K-POP",
+    "전통과 현대의 조화"
+  ]
+}
 { "index": {} }
-{ "title": "Spring 꽃 Festival", "content": "봄꽃이 만발하는 아름다운 축제." }
+{
+  "title": "Spring 꽃 Festival",
+  "content": "봄꽃이 만발하는 아름다운 축제.",
+  "attachments_content": [
+    "벚꽃 개화 시기",
+    "꽃 축제 일정 안내"
+  ]
+}
 { "index": {} }
-{ "title": "Global 경제 흐름", "content": "세계 경제가 빠르게 변화하고 있습니다." }
+{
+  "title": "Global 경제 흐름",
+  "content": "세계 경제가 빠르게 변화하고 있습니다.",
+  "attachments_content": [
+    "글로벌 시장 동향 분석",
+    "주요 경제 지표",
+    "환율 변동 영향"
+  ]
+}
 { "index": {} }
-{ "title": "Tech 발전 방향", "content": "기술 발전이 미래를 만듭니다." }
+{
+  "title": "Tech 발전 방향",
+  "content": "기술 발전이 미래를 만듭니다.",
+  "attachments_content": [
+    "5G와 IoT의 결합",
+    "인공지능 기술 동향"
+  ]
+}
 { "index": {} }
-{ "title": "Education 혁신", "content": "혁신적인 교육 방식이 확산되고 있습니다." }
+{
+  "title": "Education 혁신",
+  "content": "혁신적인 교육 방식이 확산되고 있습니다.",
+  "attachments_content": [
+    "온라인 교육 플랫폼 소개",
+    "교육 혁신 사례",
+    "학습 효과 향상 방법",
+    "미래 교육 전망"
+  ]
+}
 { "index": {} }
-{ "title": "한글과 English", "content": "Korean and English languages are 모두 중요합니다." }
+{
+  "title": "한글과 English",
+  "content": "Korean and English languages are 모두 중요합니다.",
+  "attachments_content": [
+    "한국어와 영어의 차이점",
+    "영어 학습 팁"
+  ]
+}
 { "index": {} }
-{ "title": "맛있는 Food", "content": "다양한 음식이 사람들을 행복하게 합니다." }
+{
+  "title": "맛있는 Food",
+  "content": "다양한 음식이 사람들을 행복하게 합니다.",
+  "attachments_content": [
+    "한식 레시피 모음",
+    "세계 음식 문화",
+    "음식과 건강"
+  ]
+}
 { "index": {} }
-{ "title": "환경 Protection", "content": "환경 보호는 모두의 책임입니다." }
+{
+  "title": "환경 Protection",
+  "content": "환경 보호는 모두의 책임입니다.",
+  "attachments_content": [
+    "환경 보호 캠페인 소개",
+    "재활용 방법 가이드"
+  ]
+}
 
 
 GET search-article-index/_search
@@ -194,12 +292,17 @@ GET search-article-index/_search
       "should": [
         {
           "match": {
-            "title.korean": "대한민국 만세"
+            "title.korean": "서울의"
           }
         },
         {
           "match": {
-            "content.english": "Korean culture"
+            "content.english": "Education"
+          }
+        },
+        {
+          "match": {
+            "attachments_content.*": "별"
           }
         }
       ]
@@ -210,9 +313,27 @@ GET search-article-index/_search
 GET search-article-index/_search
 {
   "query": {
+    "bool": {
+      "should": [
+
+        {
+          "match": {
+            "attachments_content.*": "별"
+          }
+        }
+      ]
+    }
+  }
+}
+
+GET search-article-index/_search
+
+GET search-article-index/_search
+{
+  "query": {
     "match_phrase": {
       "content.standard": {
-        "query": "전통과 modern culture가",
+        "query": "서울 shines brightly",
         "slop": 0
       }
     }
