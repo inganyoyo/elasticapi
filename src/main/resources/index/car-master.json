@@ -10,7 +10,7 @@
             "chosung_filter",
             "autocomplete_edge"
           ],
-          "tepe": "custom",
+          "type": "custom",
           "tokenizer": "standard"
         },
         "search_completion_chosung": {
@@ -20,7 +20,7 @@
             "stopword",
             "chosung_filter"
           ],
-          "tepe": "custom",
+          "type": "custom",
           "tokenizer": "standard"
         },
         "index_completion_jamo": {
@@ -31,7 +31,7 @@
             "jamo_filter",
             "autocomplete_edge"
           ],
-          "tepe": "custom",
+          "type": "custom",
           "tokenizer": "standard"
         },
         "search_completion_jamo": {
@@ -41,7 +41,7 @@
             "stopword",
             "jamo_filter"
           ],
-          "tepe": "custom",
+          "type": "custom",
           "tokenizer": "standard"
         },
         "index_completion_analyzer": {
@@ -52,7 +52,7 @@
             "jamo_filter",
             "autocomplete_edge"
           ],
-          "tepe": "custom",
+          "type": "custom",
           "tokenizer": "standard"
         },
         "search_completion_eng2kor": {
@@ -63,7 +63,7 @@
             "eng2kor_filter",
             "jamo_filter"
           ],
-          "tepe": "custom",
+          "type": "custom",
           "tokenizer": "standard"
         },
         "search_completion_kor2eng": {
@@ -73,7 +73,7 @@
             "stopword",
             "kor2eng_filter"
           ],
-          "tepe": "custom",
+          "type": "custom",
           "tokenizer": "standard"
         },
         "search_korean_kor2eng": {
@@ -237,7 +237,7 @@
         }
       },
       "tokenizer": {
-        "nori_tokenzier": {
+        "nori_tokenizer": {
           "type": "nori_tokenizer",
           "user_dictionary": "dictionary/ko_dict.txt",
           "decompound_mode": "discard"
@@ -255,7 +255,7 @@
         },
         "stopword": {
           "type": "stop",
-          "stopword_path": "dictionary/stopword.txt"
+          "stopwords_path": "dictionary/stopword.txt"
         },
         "english_stopword": {
           "type": "stop",

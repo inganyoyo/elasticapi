@@ -1,11 +1,11 @@
-package org.example.elasticapi.construct;
+package org.example.elasticapi.article.filter;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.json.JsonData;
 import io.micrometer.common.util.StringUtils;
 import lombok.Getter;
 import org.apache.commons.lang3.ObjectUtils;
-import org.example.elasticapi.dto.CarMaster;
+import org.example.elasticapi.article.document.CarMaster;
 
 @Getter
 public enum FilterQueryEnum {

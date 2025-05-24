@@ -1,13 +1,13 @@
-package org.example.elasticapi.indexer;
+package org.example.elasticapi.core;
 
-import co.elastic.clients.elasticsearch.core.CountRequest;
-import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.core.*;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.indices.DeleteIndexRequest;
 import co.elastic.clients.elasticsearch.indices.DeleteIndexResponse;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpPut;
@@ -16,55 +16,47 @@ import org.apache.http.nio.entity.NStringEntity;
 import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
-import org.example.elasticapi.dto.CarMaster;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
-public class IndexerHelper {
+public class ElasticSearchIndexerHelper {
     public final ElasticSearchClientManager elasticSearchClientManager;
     private final ObjectMapper objectMapper;
 
     public boolean createIndex(String indexName, Map<String, Object> indexTemplate) throws IOException {
 
-//        elasticSearchClientManager.getClient(indexName)
-//                .indices()
-//                .create(c -> c.index(indexName));
-
-
         RestClient restClient = elasticSearchClientManager.getRestClient(indexName);
         Request request = new Request(HttpPut.METHOD_NAME, "/" + indexName);
 
-        if(ObjectUtils.isNotEmpty(indexTemplate)){
-            String requestBody = jsonMapToString(indexTemplate);
+        if (ObjectUtils.isNotEmpty(indexTemplate)) {
+            String requestBody = objectMapper.writeValueAsString(indexTemplate);
             HttpEntity httpEntity = new NStringEntity(requestBody, ContentType.create("application/json", StandardCharsets.UTF_8));
 
             request.setEntity(httpEntity);
 
             Response response = restClient.performRequest(request);
-            Logger.getGlobal().info("response : " + response.toString());
+            log.info("response : " + response.toString());
         }
-        return true ;
+        return true;
     }
 
-    private String jsonMapToString(Map<String, Object> indexTemplate) throws JsonProcessingException {
-        return objectMapper.writeValueAsString(indexTemplate );
-    }
 
     public void deleteIndex(String indexName) {
         DeleteIndexRequest deleteIndexRequest = DeleteIndexRequest.of(d -> d.index(indexName));
         try {
-            DeleteIndexResponse deleteIndexResponse = elasticSearchClientManager.getClient("indexer")
+            DeleteIndexResponse deleteIndexResponse = elasticSearchClientManager.getClient(indexName)
                     .indices()
                     .delete(deleteIndexRequest);
 
-            Logger.getGlobal().info("deleteIndexResponse : " + deleteIndexResponse.toString());
+            log.info("deleteIndexResponse : " + deleteIndexResponse.toString());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -81,17 +73,45 @@ public class IndexerHelper {
         }
     }
 
-    public List<CarMaster.Response>  search(SearchRequest searchRequest, String indexName) throws IOException {
-        return elasticSearchClientManager.getClient(indexName)
-                .search(searchRequest, CarMaster.Response.class)
-                .hits().hits().stream().map(Hit::source)
-                .toList();
+
+    public void bulkInsert(String indexName, List<Map<String, String>> documents) {
+        ElasticsearchClient client = elasticSearchClientManager.getClient(indexName);
+
+        try {
+            BulkRequest.Builder br = new BulkRequest.Builder();
+
+            for (Map<String, String> docMap : documents) {
+                String id = docMap.get("id");
+                docMap.remove("id");
+                br.operations(op -> op
+                        .index(idx -> idx
+                                .index(indexName)
+                                .id(id)
+                                .document(docMap) // 전체 객체가 아닌 필요한 필드만
+                        )
+                );
+            }
+
+            BulkResponse response = client.bulk(br.build());
+            if (response.errors()) {
+                log.error("Bulk insert error : " + response.toString());
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public List<CarMaster.CompletionResponse> completionSearch(SearchRequest searchRequest, String indexName) throws IOException {
-        return elasticSearchClientManager.getClient(indexName)
-                .search(searchRequest, CarMaster.CompletionResponse.class)
-                .hits().hits().stream().map(Hit::source)
-                .toList();
+
+    /**
+     * 공통 검색 메서드
+     */
+    public <T> List<T> search(String indexName, SearchRequest searchRequest, Class<T> clazz) throws IOException {
+        ElasticsearchClient client = elasticSearchClientManager.getClient(indexName);
+
+        SearchResponse<T> response = client.search(searchRequest, clazz);
+        return response.hits().hits().stream()
+                .map(Hit::source)
+                .collect(Collectors.toList());
     }
+
 }

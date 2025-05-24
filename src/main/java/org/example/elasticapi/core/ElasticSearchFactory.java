@@ -1,8 +1,7 @@
-package org.example.elasticapi.indexer;
+package org.example.elasticapi.core;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
-import co.elastic.clients.transport.TransportUtils;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.Header;
@@ -14,19 +13,18 @@ import org.apache.http.message.BasicHeader;
 import org.elasticsearch.client.RestClient;
 import org.springframework.stereotype.Component;
 
-import javax.net.ssl.SSLContext;
-
 @Component
 @RequiredArgsConstructor
 public class ElasticSearchFactory {
     private final String serverUrl = "http://localhost:9200";
     //MacBook
-    private final String apiKey = "dVg1ZWhKWUJ0dmp2TGxraDVRM0w6MXVYMGdkS3NUYkdyaEdEMDFjS1FIdw==";
+//    private final String apiKey = "dVg1ZWhKWUJ0dmp2TGxraDVRM0w6MXVYMGdkS3NUYkdyaEdEMDFjS1FIdw==";
     //MacStudio
-    //    private final String apiKey = "RVFlV2lKWUI0SDhfcURiamU2Mm06R2E5Q0MzRmtRSWU3QzBEd0l6b3l3dw==";
+    private final String apiKey = "RVFlV2lKWUI0SDhfcURiamU2Mm06R2E5Q0MzRmtRSWU3QzBEd0l6b3l3dw==";
     private final String username = "elastic";
     private final String password = "changeme";
-//    private final String fingerprint;
+
+    //    private final String fingerprint;
     ElasticsearchClient getElasticsearchClient() {
         RestClient restClient = getRestClient();
         return new ElasticsearchClient(new RestClientTransport(restClient, new JacksonJsonpMapper()));
@@ -45,7 +43,7 @@ public class ElasticSearchFactory {
                 })
                 .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder
 //                        .setSSLContext(sslContext) // 추가된 부분
-                        .setDefaultCredentialsProvider(credsProv)
+                                .setDefaultCredentialsProvider(credsProv)
                 )
                 .build();
     }
