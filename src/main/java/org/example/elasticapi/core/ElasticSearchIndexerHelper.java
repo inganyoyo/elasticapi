@@ -103,14 +103,15 @@ public class ElasticSearchIndexerHelper {
 
 
     /**
-     * 공통 검색 메서드
+     * 공통 검색 메서드 (Map 형태로 반환)
      */
-    public <T> List<T> search(String indexName, SearchRequest searchRequest, Class<T> clazz) throws IOException {
+    public List<Map<String, Object>> search(String indexName, SearchRequest searchRequest) throws IOException {
         ElasticsearchClient client = elasticSearchClientManager.getClient(indexName);
 
-        SearchResponse<T> response = client.search(searchRequest, clazz);
+        SearchResponse<Map> response = client.search(searchRequest, Map.class);
         return response.hits().hits().stream()
                 .map(Hit::source)
+                .map(source -> (Map<String, Object>) source)
                 .collect(Collectors.toList());
     }
 

@@ -11,44 +11,20 @@ import org.example.elasticapi.article.document.CarMaster;
 public enum FilterQueryEnum {
     PRICE_NOT_ZERO("price", "price 가 0 이 아닌 것") {
         @Override
-        public void getQuery(BoolQuery.Builder musts, CarMaster.Request request) {
+        public void applyFilter(BoolQuery.Builder musts, CarMaster.Request request) {
             musts.mustNot(f -> f.term(t -> t.field(getFieldName()).value(0)));
         }
     },
-    COUNTRY("area.country", "country") {
+    PRICE_NOT_ZERO2("price2", "price2 가 0 이 아닌 것") {
         @Override
-        public void getQuery(BoolQuery.Builder musts, CarMaster.Request request) {
-            if (StringUtils.isEmpty(request.getCountry())) {
-                return;
-            }
-            musts.filter(f -> f.nested(n -> n.path("area").query(q -> q
-                    .term(t -> t.field(getFieldName()).value(request.getCountry())))));
-        }
-    },
-    REGION("area.region", "region") {
-        @Override
-        public void getQuery(BoolQuery.Builder musts, CarMaster.Request request) {
-            if (StringUtils.isEmpty(request.getRegion())) {
-                return;
-            }
-            musts.filter(f -> f.nested(n -> n.path("area").query(q -> q
-                    .term(t -> t.field(getFieldName()).value(request.getRegion())))));
-        }
-    },
-    STATE("area.state", "state") {
-        @Override
-        public void getQuery(BoolQuery.Builder musts, CarMaster.Request request) {
-            if (StringUtils.isEmpty(request.getState())) {
-                return;
-            }
-            musts.filter(f -> f.nested(n -> n.path("area").query(q -> q
-                    .term(t -> t.field(getFieldName()).value(request.getState())))));
+        public void applyFilter(BoolQuery.Builder musts, CarMaster.Request request) {
+            musts.mustNot(f -> f.term(t -> t.field(getFieldName()).value(0)));
         }
     },
 
-    MANUFACTURER("manufacturer", "manufacturer") {
+    MANUFACTURER("title", "title") {
         @Override
-        public void getQuery(BoolQuery.Builder musts, CarMaster.Request request) {
+        public void applyFilter(BoolQuery.Builder musts, CarMaster.Request request) {
             if (StringUtils.isEmpty(request.getManufacturer())) {
                 return;
             }
@@ -58,7 +34,7 @@ public enum FilterQueryEnum {
 
     MODEL("model", "model") {
         @Override
-        public void getQuery(BoolQuery.Builder musts, CarMaster.Request request) {
+        public void applyFilter(BoolQuery.Builder musts, CarMaster.Request request) {
             if (StringUtils.isEmpty(request.getModel())) {
                 return;
             }
@@ -67,7 +43,7 @@ public enum FilterQueryEnum {
     },
     COLOR("color", "color") {
         @Override
-        public void getQuery(BoolQuery.Builder musts, CarMaster.Request request) {
+        public void applyFilter(BoolQuery.Builder musts, CarMaster.Request request) {
             if (StringUtils.isEmpty(request.getColor())) {
                 return;
             }
@@ -76,7 +52,7 @@ public enum FilterQueryEnum {
     },
     FUEL("fuel", "fuel") {
         @Override
-        public void getQuery(BoolQuery.Builder musts, CarMaster.Request request) {
+        public void applyFilter(BoolQuery.Builder musts, CarMaster.Request request) {
             if (StringUtils.isEmpty(request.getFuel())) {
                 return;
             }
@@ -85,7 +61,7 @@ public enum FilterQueryEnum {
     },
     TYPE("type", "type") {
         @Override
-        public void getQuery(BoolQuery.Builder musts, CarMaster.Request request) {
+        public void applyFilter(BoolQuery.Builder musts, CarMaster.Request request) {
             if (StringUtils.isEmpty(request.getType())) {
                 return;
             }
@@ -94,7 +70,7 @@ public enum FilterQueryEnum {
     },
     TRANSMISSION("transmission", "transmission") {
         @Override
-        public void getQuery(BoolQuery.Builder musts, CarMaster.Request request) {
+        public void applyFilter(BoolQuery.Builder musts, CarMaster.Request request) {
             if (StringUtils.isEmpty(request.getTransmission())) {
                 return;
             }
@@ -103,7 +79,7 @@ public enum FilterQueryEnum {
     },
     CYLINDERS("cylinders", "cylinders") {
         @Override
-        public void getQuery(BoolQuery.Builder musts, CarMaster.Request request) {
+        public void applyFilter(BoolQuery.Builder musts, CarMaster.Request request) {
             if (StringUtils.isEmpty(request.getCylinders())) {
                 return;
             }
@@ -113,7 +89,7 @@ public enum FilterQueryEnum {
 
     YEAR("year", "year") {
         @Override
-        public void getQuery(BoolQuery.Builder musts, CarMaster.Request request) {
+        public void applyFilter(BoolQuery.Builder musts, CarMaster.Request request) {
             if (ObjectUtils.isEmpty(request.getStartYear()) && ObjectUtils.isEmpty(request.getEndYear())) {
                 return;
             }
@@ -128,7 +104,7 @@ public enum FilterQueryEnum {
     },
     PRICE("price", "price") {
         @Override
-        public void getQuery(BoolQuery.Builder musts, CarMaster.Request request) {
+        public void applyFilter(BoolQuery.Builder musts, CarMaster.Request request) {
             if (ObjectUtils.isEmpty(request.getStartPrice()) && ObjectUtils.isEmpty(request.getEndPrice())) {
                 return;
             }
@@ -144,7 +120,7 @@ public enum FilterQueryEnum {
 
     ODOMETER("odometer", "odometer") {
         @Override
-        public void getQuery(BoolQuery.Builder musts, CarMaster.Request request) {
+        public void applyFilter(BoolQuery.Builder musts, CarMaster.Request request) {
             if (ObjectUtils.isEmpty(request.getStartOdometer()) && ObjectUtils.isEmpty(request.getEndOdometer())) {
                 return;
             }
@@ -161,10 +137,10 @@ public enum FilterQueryEnum {
     private final String fieldName;
     private final String description;
 
-    public abstract void getQuery(BoolQuery.Builder musts, CarMaster.Request request);
-
     FilterQueryEnum(String fieldName, String description) {
         this.fieldName = fieldName;
         this.description = description;
     }
+
+    public abstract void applyFilter(BoolQuery.Builder musts, CarMaster.Request request);
 }

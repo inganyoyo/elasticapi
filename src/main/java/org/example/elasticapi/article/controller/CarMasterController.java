@@ -38,8 +38,11 @@ public class CarMasterController {
     }
 
     @GetMapping("/search")
-    public List<CarMaster.Response> search(@ModelAttribute CarMaster.Request request) throws IOException {
-        List<CarMaster.Response> responseList = carMasterService.search(request);
+    public List<Map<String, Object>> search(@ModelAttribute CarMaster.Request request) throws IOException {
+//        List<CarMaster.Response> responseList = carMasterService.search(request);
+//        request.setStartYear(2020);
+        request.setManufacturer("Title 1");
+        List<Map<String, Object>> responseList = carMasterService.searchArticle(request);
         log.info("responseList : " + objectMapper.writeValueAsString(responseList));
         return responseList;
     }
