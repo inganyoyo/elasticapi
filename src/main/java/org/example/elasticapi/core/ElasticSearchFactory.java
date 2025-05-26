@@ -18,9 +18,9 @@ import org.springframework.stereotype.Component;
 public class ElasticSearchFactory {
     private final String serverUrl = "http://localhost:9200";
     //MacBook
-//    private final String apiKey = "dVg1ZWhKWUJ0dmp2TGxraDVRM0w6MXVYMGdkS3NUYkdyaEdEMDFjS1FIdw==";
+    private final String apiKey = "dVg1ZWhKWUJ0dmp2TGxraDVRM0w6MXVYMGdkS3NUYkdyaEdEMDFjS1FIdw==";
     //MacStudio
-    private final String apiKey = "RVFlV2lKWUI0SDhfcURiamU2Mm06R2E5Q0MzRmtRSWU3QzBEd0l6b3l3dw==";
+//    private final String apiKey = "RVFlV2lKWUI0SDhfcURiamU2Mm06R2E5Q0MzRmtRSWU3QzBEd0l6b3l3dw==";
     private final String username = "elastic";
     private final String password = "changeme";
 

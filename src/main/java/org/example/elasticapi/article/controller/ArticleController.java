@@ -3,8 +3,9 @@ package org.example.elasticapi.article.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.elasticapi.article.document.CarMaster;
-import org.example.elasticapi.article.service.CarMasterService;
+import org.example.elasticapi.article.service.ArticleService;
+import org.example.elasticapi.common.dto.SearchRequestDTO;
+import org.example.elasticapi.common.dto.SearchResultDTO;
 import org.example.elasticapi.util.FileParser;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -17,32 +18,42 @@ import java.util.*;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-public class CarMasterController {
-    private final CarMasterService carMasterService;
+public class ArticleController {
+    private final ArticleService articleService;
     private final FileParser fileParser;
     private final ObjectMapper objectMapper;
 
     @GetMapping("/create-index")
     public void create(@RequestParam String indexName) throws IOException {
-        carMasterService.createIndex(indexName);
+        articleService.createIndex(indexName);
     }
 
     @GetMapping("/delete-index")
     public void delete(@RequestParam String indexName) throws IOException {
-        carMasterService.deleteIndex(indexName);
+        articleService.deleteIndex(indexName);
     }
 
     @GetMapping("/count-index")
     public Long count(@RequestParam String indexName) throws IOException {
-        return carMasterService.countIndex(indexName);
+        return articleService.countIndex(indexName);
     }
 
     @GetMapping("/search")
-    public List<Map<String, Object>> search(@ModelAttribute CarMaster.Request request) throws IOException {
+    public SearchResultDTO search(@ModelAttribute SearchRequestDTO request) throws IOException {
 //        List<CarMaster.Response> responseList = carMasterService.search(request);
 //        request.setStartYear(2020);
-        request.setManufacturer("Title 1");
-        List<Map<String, Object>> responseList = carMasterService.searchArticle(request);
+
+        SearchResultDTO responseList = articleService.searchArticle(request);
+        log.info("responseList : " + objectMapper.writeValueAsString(responseList));
+        return responseList;
+    }
+
+    @GetMapping("/multi-search")
+    public List<SearchResultDTO> multiSearch(@ModelAttribute SearchRequestDTO request) throws IOException {
+//        List<CarMaster.Response> responseList = carMasterService.search(request);
+//        request.setStartYear(2020);
+//        request.setManufacturer("Title 1");
+        List<SearchResultDTO> responseList = articleService.multiSearchArticle(request);
         log.info("responseList : " + objectMapper.writeValueAsString(responseList));
         return responseList;
     }
@@ -64,13 +75,13 @@ public class CarMasterController {
             documents.add(docMap);
         }
 
-        carMasterService.bulkInsertInBatches("search-article-index", documents);
+        articleService.bulkInsertInBatches("search-article-index", documents);
     }
 
     @GetMapping("/parseFile")
     public void parseFile(@RequestParam String file) throws IOException {
         log.info("file : " + file);
-        String contents = carMasterService.parseDocument(file);
+        String contents = articleService.parseDocument(file);
         log.info(contents);
     }
 }

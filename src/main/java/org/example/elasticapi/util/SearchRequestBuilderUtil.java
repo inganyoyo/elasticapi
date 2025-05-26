@@ -4,6 +4,7 @@ import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.msearch.MultisearchBody;
 import co.elastic.clients.elasticsearch.core.search.Highlight;
 import lombok.extern.slf4j.Slf4j;
 
@@ -127,8 +128,37 @@ public class SearchRequestBuilderUtil {
         requestBuilder.aggregations("count_by_field", a -> a
                 .terms(t -> t.field("_index").size(10))
         );
-
+        requestBuilder.trackScores(true);
         return requestBuilder.build();
+    }
+
+    /**
+     * SearchRequest를 MultisearchBody로 변환합니다.
+     * 단, Aggregations는 포함하지 않습니다 (멀티서치에서는 지원되지 않음).
+     */
+    public static MultisearchBody convertToMultiSearchBody(SearchRequest searchRequest) {
+
+        if (searchRequest == null) {
+            throw new IllegalArgumentException("searchRequest must not be null");
+        }
+
+        MultisearchBody.Builder builder = new MultisearchBody.Builder();
+
+        builder
+                .query(searchRequest.query()) // null-safe
+                .from(searchRequest.from())
+                .size(searchRequest.size())
+                .highlight(searchRequest.highlight());
+
+        if (searchRequest.sort() != null && !searchRequest.sort().isEmpty()) {
+            builder.sort(searchRequest.sort());
+        }
+
+        if (searchRequest.source() != null) {
+            builder.source(searchRequest.source());
+        }
+
+        return builder.build();
     }
 
     public record NestedFieldGroup(String path, List<String> fields) {

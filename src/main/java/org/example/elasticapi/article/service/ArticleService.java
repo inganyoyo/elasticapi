@@ -4,12 +4,16 @@ import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
+import co.elastic.clients.elasticsearch.core.MsearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.msearch.MultisearchBody;
+import co.elastic.clients.elasticsearch.core.msearch.RequestItem;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.elasticapi.article.document.CarMaster;
-import org.example.elasticapi.article.filter.FilterQueryEnum;
+import org.example.elasticapi.article.filter.ArticleFilterQueryEnum;
+import org.example.elasticapi.common.dto.SearchRequestDTO;
+import org.example.elasticapi.common.dto.SearchResultDTO;
 import org.example.elasticapi.core.ElasticSearchIndexerHelper;
 import org.example.elasticapi.util.FileParser;
 import org.example.elasticapi.util.SearchRequestBuilderUtil;
@@ -23,7 +27,7 @@ import java.util.Map;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CarMasterService {
+public class ArticleService {
 
     private final ElasticSearchIndexerHelper indexerHelper;
     private final FileParser fileParser;
@@ -108,7 +112,7 @@ public class CarMasterService {
 //        return indexerHelper.search(request.getIndexName(), searchRequest, CarMaster.Response.class);
 //    }
 
-    public List<Map<String, Object>> search(CarMaster.Request request) throws IOException {
+    public SearchResultDTO search(SearchRequestDTO request) throws IOException {
         int from = getPageToFrom(request.getPage(), request.getSize());
 
         List<String> includeFields = List.of("image_url", "brand", "model", "price", "odometer", "year", "color");
@@ -134,8 +138,8 @@ public class CarMasterService {
         );
 
         BoolQuery.Builder filterBuilder = QueryBuilders.bool();
-        for (FilterQueryEnum filterQueryEnum : FilterQueryEnum.values()) {
-            filterQueryEnum.applyFilter(filterBuilder, request);
+        for (ArticleFilterQueryEnum articleFilterQueryEnum : ArticleFilterQueryEnum.values()) {
+            articleFilterQueryEnum.applyFilter(filterBuilder, request);
         }
 
         SearchRequest searchRequest = SearchRequestBuilderUtil.buildSearchRequest(
@@ -153,7 +157,7 @@ public class CarMasterService {
         return indexerHelper.search(request.getIndexName(), searchRequest);
     }
 
-    public List<Map<String, Object>> searchArticle(CarMaster.Request request) throws IOException {
+    public SearchResultDTO searchArticle(SearchRequestDTO request) throws IOException {
         int from = getPageToFrom(request.getPage(), request.getSize());
 
         List<String> includeFields = List.of("attachments_content", "content", "title");
@@ -196,7 +200,78 @@ public class CarMasterService {
                 request.getSize()
         );
 
+
         return indexerHelper.search(request.getIndexName(), searchRequest);
+    }
+
+    public List<SearchResultDTO> multiSearchArticle(SearchRequestDTO request) throws IOException {
+        int from = getPageToFrom(request.getPage(), request.getSize());
+
+        List<String> includeFields = List.of("attachments_content", "content", "title");
+
+// 일반 필드 그룹
+        List<SearchRequestBuilderUtil.FieldGroup> generalFields = List.of(
+                new SearchRequestBuilderUtil.FieldGroup(List.of(
+                        "attachments_content.korean", "attachments_content.english",
+                        "content.korean", "content.english",
+                        "title.korean", "title.english"
+                ))
+        );
+
+// 정렬 필드
+        List<SearchRequestBuilderUtil.SortField> sortFields = List.of(
+                new SearchRequestBuilderUtil.SortField("title", SortOrder.Desc)
+        );
+
+// BoolQuery.Builder 생성 및 필터 조건 세팅
+//        BoolQuery.Builder filterBuilder = QueryBuilders.bool();
+//        for (FilterQueryEnum filterQueryEnum : FilterQueryEnum.values()) {
+//            filterQueryEnum.applyFilter(filterBuilder, request);
+//        }
+//
+//        Query query = SearchRequestBuilderUtil.buildQuery(filterBuilder);
+
+        Query query = null;
+        log.info("index : " + request.getIndexName());
+
+        // SearchRequest 생성
+        SearchRequest searchRequest = SearchRequestBuilderUtil.buildSearchRequest(
+                request.getIndexName(),
+                includeFields,
+                request.getKeyword(),
+                null,
+                generalFields,
+                query,      // 필터 조건 있을 때만 넣음
+                null,//sortFields,
+                from,
+                request.getSize()
+        );
+
+        SearchRequest searchRequest2 = SearchRequestBuilderUtil.buildSearchRequest(
+                request.getIndexName(),
+                includeFields,
+                request.getKeyword(),
+                null,
+                generalFields,
+                query,      // 필터 조건 있을 때만 넣음
+                null,//sortFields,
+                from,
+                request.getSize()
+        );
+
+        MultisearchBody msBody1 = SearchRequestBuilderUtil.convertToMultiSearchBody(searchRequest);
+        MultisearchBody msBody2 = SearchRequestBuilderUtil.convertToMultiSearchBody(searchRequest2);
+
+        List<RequestItem> requestItems = List.of(
+                RequestItem.of(r -> r.header(h -> h).body(msBody1)),
+                RequestItem.of(r -> r.header(h -> h).body(msBody2))
+        );
+
+        MsearchRequest msearchRequest = new MsearchRequest.Builder()
+                .searches(requestItems)
+                .build();
+
+        return indexerHelper.multiSearch(request.getIndexName(), msearchRequest);
     }
 
     public void bulkInsertInBatches(String indexName, List<Map<String, String>> documents) {
