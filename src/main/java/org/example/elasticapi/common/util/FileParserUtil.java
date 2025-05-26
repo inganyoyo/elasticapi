@@ -1,4 +1,4 @@
-package org.example.elasticapi.util;
+package org.example.elasticapi.common.util;
 
 import kr.dogfoot.hwplib.object.HWPFile;
 import kr.dogfoot.hwplib.reader.HWPReader;
@@ -31,7 +31,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class FileParser {
+public class FileParserUtil {
 
     public String classpathJsonParser(String fileName) throws IOException {
         String str;
@@ -183,7 +183,7 @@ public class FileParser {
         return kr.dogfoot.hwplib.tool.textextractor.TextExtractor.extract(hwpFile, kr.dogfoot.hwplib.tool.textextractor.TextExtractMethod.InsertControlTextBetweenParagraphText);
     }
 
-    public String parsePpt(File file) throws IOException {
+    private String parsePpt(File file) throws IOException {
         StringBuilder result = new StringBuilder();
 
         try (FileInputStream fis = new FileInputStream(file);
@@ -229,7 +229,7 @@ public class FileParser {
         return result.toString();
     }
 
-    public String parsePptx(File file) throws IOException {
+    private String parsePptx(File file) throws IOException {
         StringBuilder result = new StringBuilder();
 
         try (FileInputStream fis = new FileInputStream(file);
@@ -273,3 +273,4 @@ public class FileParser {
         return result.toString();
     }
 }
+

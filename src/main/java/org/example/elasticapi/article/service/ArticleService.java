@@ -14,9 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.elasticapi.article.filter.ArticleFilterQueryEnum;
 import org.example.elasticapi.common.dto.SearchRequestDTO;
 import org.example.elasticapi.common.dto.SearchResultDTO;
+import org.example.elasticapi.common.util.FileParserUtil;
+import org.example.elasticapi.common.util.SearchRequestBuilderUtil;
 import org.example.elasticapi.core.ElasticSearchIndexerHelper;
-import org.example.elasticapi.util.FileParser;
-import org.example.elasticapi.util.SearchRequestBuilderUtil;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -30,11 +30,11 @@ import java.util.Map;
 public class ArticleService {
 
     private final ElasticSearchIndexerHelper indexerHelper;
-    private final FileParser fileParser;
+    private final FileParserUtil fileParserUtil;
     private final ObjectMapper objectMapper;
 
     public void createIndex(String indexName) throws IOException {
-        String jsonString = fileParser.classpathJsonParser("/index/car-master.json");
+        String jsonString = fileParserUtil.classpathJsonParser("/index/car-master.json");
         Map<String, Object> indexTemplate = objectMapper.readValue(jsonString, Map.class);
         indexerHelper.createIndex(indexName, indexTemplate);
     }
@@ -291,6 +291,6 @@ public class ArticleService {
 
     public String parseDocument(String filePath) {
         File file = new File(filePath);
-        return fileParser.parseFile(file);
+        return fileParserUtil.parseFile(file);
     }
 }

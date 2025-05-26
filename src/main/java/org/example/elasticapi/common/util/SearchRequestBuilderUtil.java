@@ -1,4 +1,4 @@
-package org.example.elasticapi.util;
+package org.example.elasticapi.common.util;
 
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;

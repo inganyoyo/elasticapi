@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.elasticapi.article.service.ArticleService;
 import org.example.elasticapi.common.dto.SearchRequestDTO;
 import org.example.elasticapi.common.dto.SearchResultDTO;
-import org.example.elasticapi.util.FileParser;
+import org.example.elasticapi.common.util.FileParserUtil;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,7 +20,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class ArticleController {
     private final ArticleService articleService;
-    private final FileParser fileParser;
+    private final FileParserUtil fileParserUtil;
     private final ObjectMapper objectMapper;
 
     @GetMapping("/create-index")
@@ -61,7 +61,7 @@ public class ArticleController {
 
     @GetMapping("/bulkInsert")
     public void bulkInsert() throws IOException {
-        log.info(fileParser.classpathJsonParser("/index/car-master.json"));
+        log.info(fileParserUtil.classpathJsonParser("/index/car-master.json"));
         log.info("bulkInsert");
         int totalCount = 10000;
         List<Map<String, String>> documents = new ArrayList<>(totalCount);
