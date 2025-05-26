@@ -14,9 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.elasticapi.article.filter.ArticleFilterQueryEnum;
 import org.example.elasticapi.common.dto.SearchRequestDTO;
 import org.example.elasticapi.common.dto.SearchResultDTO;
+import org.example.elasticapi.common.elasticsearch.ElasticSearchIndexerHelper;
 import org.example.elasticapi.common.util.FileParserUtil;
 import org.example.elasticapi.common.util.SearchRequestBuilderUtil;
-import org.example.elasticapi.core.ElasticSearchIndexerHelper;
 import org.springframework.stereotype.Service;
 
 import java.io.File;

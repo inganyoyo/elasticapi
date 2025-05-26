@@ -1,4 +1,4 @@
-package org.example.elasticapi.core;
+package org.example.elasticapi.common.elasticsearch;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import lombok.RequiredArgsConstructor;
